@@ -72,8 +72,37 @@ int main(int argc, char *argv[]) {
      */
     serv_addr.sin_port = htons(portno);
     
-    
+    /* third fiels from serv_adddr contains the IP address of the host
+        - for server code this will be the IP of the machine of the server
+        - INADDR_ANY gets the address for us
+     */
     serv_addr.sin_addr.s_addr = INADDR_ANY;
+    
+    /* bind() binds a socket to an address (i.e. the address of the current
+       host and port number on which the server will run)
+       @param1: the socket file descriptor
+       @param2: the address to which is bound
+        - a pointer to a struct of type sockaddr (we type cast to correct it)
+       @param3: the size of the address to which its bound
+     */
+    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0){
+        error("ERROR on binding");
+    }
+    
+    /* listens on the socket for any connections
+       @param1: the socket file descriptor
+       @param2: size of the backlog queue
+        - the number of connections that can be waiting while the process is
+          handling a connection
+        - should be set to 5, the max size permitted by most systems
+     */
+    listen(sockfd, 5);
+    
+    clilen = sizeof(cli_addr);
+    newsockfd = accept(sockfd, (struck sockaddr *) &cli_addr, &clilen);
+    if (newsocksd < 0 ) {
+        error("ERROR on accpet");
+    }
 
 
 
