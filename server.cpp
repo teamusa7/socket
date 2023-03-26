@@ -1,7 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
-#include <thread>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/types.h>
@@ -14,13 +14,15 @@ void error (char *msg) {
 
 int main(int argc, char *argv[]) {
     //file descriptors
-    int sockfd, newsockfd, 
+    int sockfd, newsockfd,
     //stores the port number on which the server accepts connections
-    portno, 
+    portno;
+    
     //stores the size of the client address
-    client_len, 
+    socklen_t client_len;
+    
     //return value for read() write(). contains the number of char read or written
-    n;
+    ssize_t n;
 
     //server reads characters from the socket connection to this buffer
     char buffer[256];
@@ -52,7 +54,7 @@ int main(int argc, char *argv[]) {
      */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < -1) {
-        error("ERROR opening socket");
+        error((char *)"ERROR opening socket");
     }
     
     /* sets all values in a buffer to zero
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]) {
        @param3: the size of the address to which its bound
      */
     if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0){
-        error("ERROR on binding");
+        error((char *)"ERROR on binding");
     }
     
     /* listens on the socket for any connections
@@ -98,13 +100,36 @@ int main(int argc, char *argv[]) {
      */
     listen(sockfd, 5);
     
-    clilen = sizeof(cli_addr);
-    newsockfd = accept(sockfd, (struck sockaddr *) &cli_addr, &clilen);
-    if (newsocksd < 0 ) {
-        error("ERROR on accpet");
+    client_len = sizeof(cli_addr);
+    
+    /* accept() causes the process to block until a client connects
+       @param1: the socket file descriptor
+       @param2: a reference pointer to the address of the client
+       @param3: the size of the structure
+       @return: a new fd to use for this connection
+     */
+    newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &client_len);
+    
+    if (newsockfd < 0 ) {
+        error((char *)"ERROR on accpet");
     }
-
-
-
+    // initializes the buffer
+    bzero(buffer, 256);
+    
+    // reads from the socket and returns the number of char read
+    n = read(newsockfd, buffer, 255);
+    if (n < 0) {
+        error((char *)"ERROR reading from a socket");
+    }
+    std::cout << "Here is the message: " << buffer << std::endl;
+    
+    n = write(newsockfd, "I got your message", 18);
+    if(n < 0) error((char *)"Error writing to a socket");
+    
+    // close the open sockets
+    close(newsockfd);
+    close(sockfd);
+    
     return 0;
+
 }
