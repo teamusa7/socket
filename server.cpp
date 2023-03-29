@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     
     /* sets all values in a buffer to zero
        @param1: a pointer to the buffer
-       @param2: size of the buffer (intitalizes serv_addr to zeros)
+       @param2: size of the buffer (initalizes serv_addr to zeros)
      */
     bzero((char *) &serv_addr, sizeof(serv_addr));
     
